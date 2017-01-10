@@ -1,0 +1,44 @@
+var request = require("request");
+var login = require("facebook-chat-api");
+var answeredThreads = {};
+  login({email: "taikhoan", password: "matkhau"}, // dien tk mk fb o day !
+
+  function callback (err, api) {
+    if(err) return console.error(err);
+	
+ api.setOptions({
+      forceLogin: true
+    });
+
+    api.listen(function callback(err, message) {
+
+			if (message.body) 
+			{
+				 console.log("Message: "+message.threadID+'---'+message.body);
+			
+				text_chat=message.body
+				request("http://www.simsimi.com/getRealtimeReq?uuid=UwmPMKoqosEETKleXWGOJ6lynN1TQq18wwvrmCy6IRt&lc=vn&ft=1&reqText="+encodeURI(text_chat)+"&status=W",
+
+				 function(error, response, body) {
+				  
+				 	if (error) return ;
+				 	if (body.indexOf("502 Bad Gateway")> 0 || body.indexOf("respSentence") <0 ) return ;
+				 
+
+				  text = JSON.parse(body);
+				  if (text.status == "200")
+				  {
+
+				  	var ans=	text.respSentence;
+			
+				  	api.sendMessage(ans, message.threadID)
+		
+					 console.log("       ans:"+ans);
+				  }
+				});
+
+			}
+
+		
+	});
+});
